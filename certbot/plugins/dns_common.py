@@ -24,7 +24,10 @@ logger = logging.getLogger(__name__)
 class DNSAuthenticator(common.Plugin):
     """Base class for DNS  Authenticators"""
 
-    _attempt_cleanup = False
+    def __init__(self, config, name):
+        super(DNSAuthenticator, self).__init__(config, name)
+
+        self._attempt_cleanup = False
 
     @classmethod
     def add_parser_arguments(cls, add):
