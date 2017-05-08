@@ -282,7 +282,7 @@ def validate_file_permissions(filename):
 
     validate_file(filename)
 
-    permissions = stat.S_IMODE(os.lstat(filename).st_mode)
+    permissions = stat.S_IMODE(os.stat(filename).st_mode)
     if permissions & stat.S_IRWXO:
         logger.warning('Unsafe permissions on credentials configuration file: %s', filename)
 
