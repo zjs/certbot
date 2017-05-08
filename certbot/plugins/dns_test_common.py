@@ -49,7 +49,7 @@ def write(values, path):
     """Write the specified values to a config file.
 
     :param dict values: A map of values to write.
-    :param string path: Where to write the values.
+    :param str path: Where to write the values.
     """
 
     config = configobj.ConfigObj()

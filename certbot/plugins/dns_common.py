@@ -82,9 +82,9 @@ class DNSAuthenticator(common.Plugin):
         """
         Performs a dns-01 challenge by creating a DNS TXT record.
 
-        :param string domain: The domain being validated.
-        :param string validation_domain_name: The validation record domain name.
-        :param string validation: The validation record content.
+        :param str domain: The domain being validated.
+        :param str validation_domain_name: The validation record domain name.
+        :param str validation: The validation record content.
         :raises errors.PluginError: If the challenge cannot be performed
         """
         raise NotImplementedError()
@@ -96,9 +96,9 @@ class DNSAuthenticator(common.Plugin):
 
         Fails gracefully if no such record exists.
 
-        :param string domain: The domain being validated.
-        :param string validation_domain_name: The validation record domain name.
-        :param string validation: The validation record content.
+        :param str domain: The domain being validated.
+        :param str validation_domain_name: The validation record domain name.
+        :param str validation: The validation record content.
         """
         raise NotImplementedError()
 
@@ -108,8 +108,8 @@ class DNSAuthenticator(common.Plugin):
 
         If necessary, prompts the user and stores the result.
 
-        :param string key: The configuration key.
-        :param string label: The user-friendly label for this piece of information.
+        :param str key: The configuration key.
+        :param str label: The user-friendly label for this piece of information.
         """
 
         configured_value = self.conf(key)
@@ -124,8 +124,8 @@ class DNSAuthenticator(common.Plugin):
 
         If necessary, prompts the user and stores the result.
 
-        :param string key: The configuration key.
-        :param string label: The user-friendly label for this piece of information.
+        :param str key: The configuration key.
+        :param str label: The user-friendly label for this piece of information.
         """
 
         configured_value = self.conf(key)
@@ -142,8 +142,8 @@ class DNSAuthenticator(common.Plugin):
 
         Always stores absolute paths to avoid issues during renewal.
 
-        :param string key: The configuration key.
-        :param string label: The user-friendly label for this piece of information.
+        :param str key: The configuration key.
+        :param str label: The user-friendly label for this piece of information.
         :param dict required_variables: Map of variable which must be present to error to display.
         """
 
@@ -160,9 +160,9 @@ class DNSAuthenticator(common.Plugin):
         """
         Prompt the user for a piece of information.
 
-        :param string label: The user-friendly label for this piece of information.
+        :param str label: The user-friendly label for this piece of information.
         :returns: The user's response (guaranteed non-empty).
-        :rtype: string
+        :rtype: str
         """
 
         def __validator(i):
@@ -184,9 +184,9 @@ class DNSAuthenticator(common.Plugin):
         """
         Prompt the user for a path.
 
-        :param string label: The user-friendly label for the file.
+        :param str label: The user-friendly label for the file.
         :returns: The user's response (guaranteed to exist).
-        :rtype: string
+        :rtype: str
         """
 
         def __validator(filename):
@@ -211,7 +211,7 @@ class CredentialsConfiguration(object):
 
     def __init__(self, filename, mapper=lambda x: x):
         """
-        :param string filename: A path to the configuration file.
+        :param str filename: A path to the configuration file.
         :param callable mapper: A transformation to apply to configuration key names
         :raises PluginError: If the file does not exist.
         """
@@ -248,9 +248,9 @@ class CredentialsConfiguration(object):
     def conf(self, var):
         """Find a configuration value for variable `var`, as transformed by `mapper`.
 
-        :param string var: The variable to get.
+        :param str var: The variable to get.
         :returns: The value of the variable.
-        :rtype: string
+        :rtype: str
         """
 
         return self._get(var)
@@ -292,7 +292,7 @@ def base_domain_name_guesses(domain):
     >>> base_domain_name_guesses('foo.bar.baz.example.com')
     ['foo.bar.baz.example.com', 'bar.baz.example.com', 'baz.example.com', 'example.com', 'com']
 
-    :param string domain: The domain for which to return guesses.
+    :param str domain: The domain for which to return guesses.
     :returns: The a list of less specific domain names.
     :rtype: list
     """

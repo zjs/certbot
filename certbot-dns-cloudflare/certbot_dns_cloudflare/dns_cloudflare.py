@@ -71,9 +71,9 @@ class _CloudflareClient(object):
         """
         Add a TXT record using the supplied information.
 
-        :param string domain: The domain to use to look up the Cloudflare zone.
-        :param string record_name: The record name (typically beginning with '_acme-challenge.').
-        :param string record_content: The record content (typically the challenge validation).
+        :param str domain: The domain to use to look up the Cloudflare zone.
+        :param str record_name: The record name (typically beginning with '_acme-challenge.').
+        :param str record_content: The record content (typically the challenge validation).
         :param int record_ttl: The record TTL (number of seconds that the record may be cached).
         :raises: errors.PluginError if an error occurs communicating with the Cloudflare API
         """
@@ -104,9 +104,9 @@ class _CloudflareClient(object):
 
         Failures are logged, but not raised.
 
-        :param string domain: The domain to use to look up the Cloudflare zone.
-        :param string record_name: The record name (typically beginning with '_acme-challenge.').
-        :param string record_content: The record content (typically the challenge validation).
+        :param str domain: The domain to use to look up the Cloudflare zone.
+        :param str record_name: The record name (typically beginning with '_acme-challenge.').
+        :param str record_content: The record content (typically the challenge validation).
         """
 
         try:
@@ -133,9 +133,9 @@ class _CloudflareClient(object):
         """
         Find the zone_id for a given domain.
 
-        :param string domain: The domain for which to find the zone_id.
+        :param str domain: The domain for which to find the zone_id.
         :returns: The zone_id, if found.
-        :rtype: string
+        :rtype: str
         :raises: errors.PluginError if no zone_id is found.
         """
 
@@ -174,11 +174,11 @@ class _CloudflareClient(object):
         """
         Find the record_id for a TXT record with the given name and content.
 
-        :param string zone_id: The zone_id which contains the record.
-        :param string record_name: The record name (typically beginning with '_acme-challenge.').
-        :param string record_content: The record content (typically the challenge validation).
+        :param str zone_id: The zone_id which contains the record.
+        :param str record_name: The record name (typically beginning with '_acme-challenge.').
+        :param str record_content: The record content (typically the challenge validation).
         :returns: The record_id, if found.
-        :rtype: string
+        :rtype: str
         """
 
         params = {'type': 'TXT',
