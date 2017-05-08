@@ -22,12 +22,11 @@ class Authenticator(dns_common.DNSAuthenticator):
     """
 
     description = 'Obtain certs using a DNS TXT record (if you are using Cloudflare for DNS).'
-
     ttl = 120
-    credentials = None
 
     def __init__(self, *args, **kwargs):
         super(Authenticator, self).__init__(*args, **kwargs)
+        self.credentials = None
 
     @classmethod
     def add_parser_arguments(cls, add):
