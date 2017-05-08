@@ -1,17 +1,15 @@
 """Tests for certbot_dns_cloudflare.dns_cloudflare."""
 
-import mock
 import os
 import unittest
 
-from certbot import errors
+import CloudFlare
+import mock
 
+from certbot import errors
 from certbot.plugins import dns_test_common
 from certbot.plugins.dns_test_common import DOMAIN
-
 from certbot.tests import util as test_util
-
-import CloudFlare
 
 API_ERROR = CloudFlare.exceptions.CloudFlareAPIError(1000, '', '')
 API_KEY = 'an-api-key'
