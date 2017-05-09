@@ -123,7 +123,7 @@ class DNSAuthenticator(common.Plugin):
 
             setattr(self.config, self.dest(key), new_value)
 
-    def _configure_file(self, key, label):
+    def _configure_file(self, key, label, validator=None):
         """
         Ensure that a configuration value is available for a path.
 
@@ -135,7 +135,7 @@ class DNSAuthenticator(common.Plugin):
 
         configured_value = self.conf(key)
         if not configured_value:
-            new_value = self._prompt_for_file(label)
+            new_value = self._prompt_for_file(label, validator)
 
             setattr(self.config, self.dest(key), os.path.abspath(os.path.expanduser(new_value)))
 
@@ -152,7 +152,11 @@ class DNSAuthenticator(common.Plugin):
         :param dict required_variables: Map of variable which must be present to error to display.
         """
 
-        self._configure_file(key, label)
+        def __validator(filename):
+            if required_variables:
+                CredentialsConfiguration(filename, self.dest).require(required_variables)
+
+        self._configure_file(key, label, __validator)
 
         credentials_configuration = CredentialsConfiguration(self.conf(key), self.dest)
         if required_variables:
@@ -185,11 +189,14 @@ class DNSAuthenticator(common.Plugin):
             raise errors.PluginError('{0} required to proceed.'.format(label))
 
     @staticmethod
-    def _prompt_for_file(label):
+    def _prompt_for_file(label, validator=None):
         """
         Prompt the user for a path.
 
         :param str label: The user-friendly label for the file.
+        :param callable validator: A method which will be called to validate the supplied input
+            after it has been validated to be a non-empty path to an existing file. Should throw a
+            `~certbot.errors.PluginError` to indicate any issue.
         :returns: The user's response (guaranteed to exist).
         :rtype: str
         """
@@ -198,7 +205,12 @@ class DNSAuthenticator(common.Plugin):
             if not filename:
                 raise errors.PluginError('Please enter a valid path to your {0}.'.format(label))
 
-            validate_file(os.path.expanduser(filename))
+            filename = os.path.expanduser(filename)
+
+            validate_file(filename)
+
+            if validator:
+                validator(filename)
 
         code, response = ops.validated_directory(
             __validator,

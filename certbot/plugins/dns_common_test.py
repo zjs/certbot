@@ -100,6 +100,25 @@ class DNSAuthenticatorTest(util.TempDirTestCase, dns_test_common.BaseAuthenticat
 
         self.assertEqual(credentials.conf("test"), "value")
 
+    @util.patch_get_utility()
+    def test_prompt_credentials(self, mock_get_utility):
+        bad_path = os.path.join(self.tempdir, 'bad-file.ini')
+        dns_test_common.write({"fake_other": "other_value"}, bad_path)
+
+        path = os.path.join(self.tempdir, 'file.ini')
+        dns_test_common.write({"fake_test": "value"}, path)
+        setattr(self.config, "fake_credentials", "")
+
+        mock_display = mock_get_utility()
+        mock_display.directory_select.side_effect = ((display_util.OK, "",),
+                                                     (display_util.OK, "not-a-file.ini",),
+                                                     (display_util.OK, self.tempdir),
+                                                     (display_util.OK, bad_path),
+                                                     (display_util.OK, path,))
+
+        credentials = self.auth._configure_credentials("credentials", "", {"test": ""})
+        self.assertEqual(credentials.conf("test"), "value")
+
 
 class CredentialsConfigurationTest(util.TempDirTestCase):
     class _MockLoggingHandler(logging.Handler):
