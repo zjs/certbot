@@ -230,11 +230,16 @@ class CredentialsConfiguration(object):
         """
         :param str filename: A path to the configuration file.
         :param callable mapper: A transformation to apply to configuration key names
-        :raises PluginError: If the file does not exist.
+        :raises PluginError: If the file does not exist or is not a valid format.
         """
         validate_file_permissions(filename)
 
-        self.confobj = configobj.ConfigObj(filename)
+        try:
+            self.confobj = configobj.ConfigObj(filename)
+        except configobj.ConfigObjError as e:
+            logger.debug("Error parsing credentials configuration: %s", e, exc_info=True)
+            raise errors.PluginError("Error parsing credentials configuration: {0}".format(e))
+
         self.mapper = mapper
 
     def require(self, required_variables):
