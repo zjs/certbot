@@ -230,7 +230,7 @@ class CredentialsConfiguration(object):
         """
         :param str filename: A path to the configuration file.
         :param callable mapper: A transformation to apply to configuration key names
-        :raises PluginError: If the file does not exist or is not a valid format.
+        :raises errors.PluginError: If the file does not exist or is not a valid format.
         """
         validate_file_permissions(filename)
 
@@ -246,7 +246,7 @@ class CredentialsConfiguration(object):
         """Ensures that the supplied set of variables are all present in the file.
 
         :param dict required_variables: Map of variable which must be present to error to display.
-        :raises PluginError: If one or more are missing.
+        :raises errors.PluginError: If one or more are missing.
         """
         messages = []
 

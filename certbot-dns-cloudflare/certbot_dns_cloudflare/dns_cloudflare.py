@@ -73,7 +73,7 @@ class _CloudflareClient(object):
         :param str record_name: The record name (typically beginning with '_acme-challenge.').
         :param str record_content: The record content (typically the challenge validation).
         :param int record_ttl: The record TTL (number of seconds that the record may be cached).
-        :raises: errors.PluginError if an error occurs communicating with the Cloudflare API
+        :raises certbot.errors.PluginError: if an error occurs communicating with the Cloudflare API
         """
 
         zone_id = self._find_zone_id(domain)
@@ -134,7 +134,7 @@ class _CloudflareClient(object):
         :param str domain: The domain for which to find the zone_id.
         :returns: The zone_id, if found.
         :rtype: str
-        :raises: errors.PluginError if no zone_id is found.
+        :raises certbot.errors.PluginError: if no zone_id is found.
         """
 
         zone_name_guesses = dns_common.base_domain_name_guesses(domain)
