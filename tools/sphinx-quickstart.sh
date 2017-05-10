@@ -10,6 +10,7 @@ PROJECT=$1
 yes "n" | sphinx-quickstart --dot _ --project $PROJECT --author "Certbot Project" -v 0 --release 0 --language en --suffix .rst --master index --ext-autodoc --ext-intersphinx --ext-todo --ext-coverage --ext-viewcode --makefile --batchfile $PROJECT/docs
 
 cd $PROJECT/docs
+sed -i -e "s|\# import os|import os|" conf.py
 sed -i -e "s|\# needs_sphinx = '1.0'|needs_sphinx = '1.0'|" conf.py
 sed -i -e "s|intersphinx_mapping = {'https://docs.python.org/': None}|intersphinx_mapping = {\n    'python': ('https://docs.python.org/', None),\n    'acme': ('https://acme-python.readthedocs.org/en/latest/', None),\n    'certbot': ('https://certbot.eff.org/docs/', None),\n}|" conf.py
 sed -i -e "s|html_theme = 'alabaster'|\n# http://docs.readthedocs.org/en/latest/theme.html#how-do-i-use-this-locally-and-on-read-the-docs\n# on_rtd is whether we are on readthedocs.org\non_rtd = os.environ.get('READTHEDOCS', None) == 'True'\nif not on_rtd:  # only import and set the theme if we're building docs locally\n    import sphinx_rtd_theme\n    html_theme = 'sphinx_rtd_theme'\n    html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]\n# otherwise, readthedocs.org uses their theme by default, so no need to specify it|" conf.py
