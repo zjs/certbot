@@ -31,8 +31,7 @@ class Authenticator(dns_common.DNSAuthenticator):
     @classmethod
     def add_parser_arguments(cls, add):
         super(Authenticator, cls).add_parser_arguments(add)
-        add('credentials', help='Cloudflare credentials file.')
-        # TODO: Document format (without calling `self.dest`?!)
+        add('credentials', help='Cloudflare credentials INI file.')
 
     def more_info(self):  # pylint: disable=missing-docstring,no-self-use
         return 'This plugin configures a DNS TXT record to respond to a dns-01 challenge using ' + \
@@ -41,7 +40,7 @@ class Authenticator(dns_common.DNSAuthenticator):
     def _setup_credentials(self):
         self.credentials = self._configure_credentials(
             'credentials',
-            'Cloudflare credentials file',
+            'Cloudflare credentials INI file',
             {
                 'email': 'email address associated with Cloudflare account',
                 'api-key': 'API key for Cloudflare account, obtained from {0}'.format(ACCOUNT_URL)
