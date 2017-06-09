@@ -23,9 +23,6 @@ OK = "ok"
 CANCEL = "cancel"
 """Display exit code for a user canceling the display."""
 
-HELP = "help"
-"""Display exit code when for when the user requests more help."""
-
 ESC = "esc"
 """Display exit code when the user hits Escape"""
 

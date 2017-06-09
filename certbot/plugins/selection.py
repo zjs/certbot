@@ -123,13 +123,6 @@ def choose_plugin(prepared, question):
                     "was:\n\n{0}".format(plugin_ep.prepare()), pause=False)
             else:
                 return plugin_ep
-        elif code == display_util.HELP:
-            if prepared[index].misconfigured:
-                msg = "Reported Error: %s" % prepared[index].prepare()
-            else:
-                msg = prepared[index].init().more_info()
-            z_util(interfaces.IDisplay).notification(msg,
-                                                     force_interactive=True)
         else:
             return None
 

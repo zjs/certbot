@@ -27,9 +27,7 @@ def select_vhost(domain, vhosts):
         return None
     while True:
         code, tag = _vhost_menu(domain, vhosts)
-        if code == display_util.HELP:
-            _more_info_vhost(vhosts[tag])
-        elif code == display_util.OK:
+        if code == display_util.OK:
             return vhosts[tag]
         else:
             return None
@@ -96,10 +94,3 @@ def _vhost_menu(domain, vhosts):
         raise errors.MissingCommandlineFlag(msg)
 
     return code, tag
-
-
-def _more_info_vhost(vhost):
-    zope.component.getUtility(interfaces.IDisplay).notification(
-        "Virtual Host Information:{0}{1}{0}{2}".format(
-            os.linesep, "-" * (display_util.WIDTH - 4), str(vhost)),
-        force_interactive=True)
