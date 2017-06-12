@@ -130,7 +130,7 @@ to serve all files under specified web root ({0})."""
             _validate_webroot,
             "Input the webroot for {0}:".format(domain),
             force_interactive=True)
-        if code == display_util.CANCEL or code == display_util.ESC:
+        if code == display_util.CANCEL:
             return None
         else:  # code == display_util.OK
             return _validate_webroot(webroot)

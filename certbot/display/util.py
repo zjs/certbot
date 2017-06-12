@@ -23,9 +23,6 @@ OK = "ok"
 CANCEL = "cancel"
 """Display exit code for a user canceling the display."""
 
-ESC = "esc"
-"""Display exit code when the user hits Escape"""
-
 
 def _wrap_lines(msg):
     """Format lines nicely to 80 chars.
