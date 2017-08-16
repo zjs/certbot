@@ -263,6 +263,8 @@ def cli_plugin_requests(config):  # pylint: disable=too-many-branches
         req_auth = set_configurator(req_auth, "dns-rfc2136")
     if config.dns_route53:
         req_auth = set_configurator(req_auth, "dns-route53")
+    if config.exim:
+        req_inst = set_configurator(req_inst, "exim")
     logger.debug("Requested authenticator %s and installer %s", req_auth, req_inst)
     return req_auth, req_inst
 
