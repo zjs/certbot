@@ -37,7 +37,11 @@ class Installer(common.Plugin):
         pass
 
     def get_all_names(self):
-        pass
+        """Returns all names known to Exim.
+
+        :rtype: `collections.Iterable` of `str`
+        """
+        pass  # TODO: return the value of `primary_hostname` from the Exim config
 
     def deploy_cert(self, domain, cert_path, key_path, chain_path, fullchain_path):
         pass
