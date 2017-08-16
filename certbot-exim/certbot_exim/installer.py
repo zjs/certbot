@@ -64,6 +64,9 @@ class Installer(common.Plugin):
 
         :raises .PluginError: when cert cannot be deployed
         """
+        # TODO: Set `tls_advertise_hosts = *`
+        # TODO: Set `tls_certificate = $fulchain_path` and `tls_privatekey = $key_path`
+        # TODO: Maybe set `tls_require_ciphers` based on Mozilla recommendations (Apache and nginx both seem to do this)
         pass
 
     def restart(self):
@@ -78,7 +81,7 @@ class Installer(common.Plugin):
 
         :raises .errors.MisconfigurationError: If config_test fails
         """
-        pass
+        pass  # TODO: `exim -C test.conf -bV`? (or similar)
 
     ##################################
     # Enhancement methods (IInstaller)
