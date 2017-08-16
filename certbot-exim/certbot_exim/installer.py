@@ -7,6 +7,8 @@ from certbot import errors
 from certbot import interfaces
 from certbot.plugins import common
 
+from certbot_exim import constants
+
 logger = logging.getLogger(__name__)
 
 
@@ -20,7 +22,8 @@ class Installer(common.Plugin):
 
     @classmethod
     def add_parser_arguments(cls, add):
-        pass
+        add("server-root", default=constants.CLI_DEFAULTS["server_root"],
+            help="Exim server root directory.")
 
     def __init__(self, *args, **kwargs):
         super(Installer, self).__init__(*args, **kwargs)
