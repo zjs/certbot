@@ -17,8 +17,6 @@ logger = logging.getLogger(__name__)
 @zope.interface.provider(interfaces.IPluginFactory)
 class Installer(common.Plugin):
     """Exim installer.
-
-    TODO: implement
     """
 
     @classmethod
@@ -155,7 +153,7 @@ class Installer(common.Plugin):
             an attempt to save the configuration, or an error creating a
             checkpoint
         """
-        pass
+        pass  # TODO: Implement based on nginx
 
     def rollback_checkpoints(self, rollback=1):
         """Revert `rollback` number of configuration checkpoints.
@@ -165,7 +163,7 @@ class Installer(common.Plugin):
         :raises .errors.PluginError: If there is a problem with the input or
             the function is unable to correctly revert the configuration
         """
-        pass
+        pass  # TODO: Copy from nginx
 
     def recovery_routine(self):
         """Revert configuration to most recent finalized checkpoint.
@@ -176,7 +174,7 @@ class Installer(common.Plugin):
 
         :raises .errors.PluginError: If unable to recover the configuration
         """
-        pass
+        pass  # TODO: Copy from nginx
 
     def view_config_changes(self):
         """Show all of the configuration changes that have taken place.
@@ -184,4 +182,4 @@ class Installer(common.Plugin):
         :raises .errors.PluginError: If there is a problem while processing
             the checkpoints directories.
         """
-        pass
+        pass  # TODO: Copy from nginx
