@@ -5,6 +5,7 @@ import zope.interface
 
 from certbot import errors
 from certbot import interfaces
+from certbot import util
 from certbot.plugins import common
 
 from certbot_exim import constants
@@ -34,7 +35,11 @@ class Installer(common.Plugin):
         return 'This plugin configures Exim to use a certificate.'
 
     def prepare(self):
-        pass
+        """Check if exim daemon is running"""
+        restart_cmd = constants.CLI_DEFAULTS['restart_cmd']
+        if not util.exe_exists(restart_cmd):
+            raise errors.NoInstallationError(
+                'Cannot find command {0}'.format(restart_cmd))
 
     def get_all_names(self):
         """Returns all names known to Exim.
@@ -43,11 +48,16 @@ class Installer(common.Plugin):
         """
         pass  # TODO: return the value of `primary_hostname` from the Exim config
 
-    def deploy_cert(self, domain, cert_path, key_path, chain_path, fullchain_path):
+    def deploy_cert(self, domain, cert_path, key_path, chain_path,
+                    fullchain_path):
         pass
 
     def restart(self):
-        pass
+        """Restart exim daemon"""
+        try:
+            util.run_script(constants.CLI_DEFAULTS['restart_cmd'])
+        except errors.SubprocessError as err:
+            raise errors.MisconfigurationError(str(err))
 
     def supported_enhancements(self):  # pylint: disable=no-self-use
         """Returns currently supported enhancements."""
