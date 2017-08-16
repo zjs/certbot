@@ -30,8 +30,8 @@ class Installer(common.Plugin):
 
         self._enhance_func = {"staple-ocsp": self._enable_ocsp_stapling}
 
-    def more_info(self):
-        pass
+    def more_info(self):  # pylint: disable=missing-docstring,no-self-use
+        return 'This plugin configures Exim to use a certificate.'
 
     def prepare(self):
         pass
