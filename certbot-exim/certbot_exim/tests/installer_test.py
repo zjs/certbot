@@ -1,25 +1,21 @@
 """Tests for certbot_exim.installer."""
-
-import copy
 import os
-import pkg_resources
 import shutil
 import tempfile
 import unittest
 
 import mock
+import six
 
 import zope.component
 
 from certbot import configuration
-from certbot import achallenges
-from certbot import crypto_util
 from certbot import errors
-from certbot.tests import util as certbot_test_util
 
 from certbot.plugins import common
 
 from certbot_exim import installer
+
 
 class EximTest(unittest.TestCase):
     def setUp(self):
@@ -30,7 +26,7 @@ class EximTest(unittest.TestCase):
         self.logs_dir = tempfile.mkdtemp('logs')
 
         self.config_path = os.path.join(self.temp_dir, "etc_exim4")
-        self.config = get_exim_installer(
+        self.installer = get_exim_installer(
             self.config_path, self.config_dir, self.work_dir, self.logs_dir)
 
     def tearDown(self):
@@ -39,33 +35,56 @@ class EximTest(unittest.TestCase):
         shutil.rmtree(self.work_dir)
         shutil.rmtree(self.logs_dir)
 
+    def test_parser_arguments(self):
+        m = mock.MagicMock()
+
+        # pylint: disable=no-member
+        self.installer.add_parser_arguments(m)
+
+        m.assert_any_call('server-root', default=mock.ANY, help=mock.ANY)
+        m.assert_any_call('file-configuration', action="store_true", help=mock.ANY)
+
+    def test_more_info(self):
+        # pylint: disable=no-member
+        self.assertTrue(isinstance(self.installer.more_info(), six.string_types))
+
     @mock.patch("certbot_exim.installer.util.exe_exists")
     def test_prepare_no_install(self, mock_exe_exists):
         mock_exe_exists.return_value = False
-        self.assertRaises(
-            errors.NoInstallationError, self.config.prepare)
+        self.assertRaises(errors.NoInstallationError, self.installer.prepare)
 
-    def test_prepare(self):
-        pass
+    @mock.patch("certbot_exim.installer.util.exe_exists")
+    def test_prepare_is_installed(self, mock_exe_exists):
+        mock_exe_exists.return_value = True
+        self.installer.prepare()
+
+        self.assertIsNotNone(self.installer.parser)
 
     def test_supported_enhancements(self):
         self.assertEqual(['staple-ocsp'],
-                         self.config.supported_enhancements())
+                         self.installer.supported_enhancements())
 
     def test_get_all_names(self):
-        pass
+        self.installer.parser = mock.MagicMock()
+        self.installer.parser.get_directive.return_value = "test.mail.example.com"
 
-    def test_enhance(self):
-        self.assertRaises(
-            errors.PluginError, self.config.enhance, 'myhost', 'unknown_enhancement')
+        names = self.installer.get_all_names()
+
+        self.installer.parser.get_directive.assert_called_once_with("primary_hostname")
+        self.assertEqual(len(names), 1)
+        self.assertEqual(names[0], "test.mail.example.com")
+
+    def test_enhance_unknown(self):
+        self.assertRaises(errors.PluginError, self.installer.enhance, 'myhost', 'unknown')
+
+    def test_enhance_staple_ocsp(self):
+        self.installer.parser = mock.MagicMock()
+
+        self.installer.enhance('myhost', 'staple-ocsp')
+        self.installer.parser.set_directive.assert_called_once_with("tls_ocsp_file", mock.ANY)
 
     def test_config_test(self):
         pass
-
-    def test_ocsp_stapling(self):
-        pass
-
-
 
 
 def get_exim_installer(
@@ -93,20 +112,12 @@ def get_exim_installer(
                     tls_sni_01_port=5001,
                 ),
                 name="exim")
-            config.prepare()
 
     # Provide general config utility.
     nsconfig = configuration.NamespaceConfig(config.config)
     zope.component.provideUtility(nsconfig)
 
     return config
-
-
-def get_data_filename(filename):
-    """Gets the filename of a test data file."""
-    return pkg_resources.resource_filename(
-        "certbot_exim.tests", os.path.join(
-            "testdata", "etc_exim4", filename))
 
 
 if __name__ == '__main__':
