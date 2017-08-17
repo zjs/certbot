@@ -27,7 +27,7 @@ class EximInstaller(common.Plugin):
         add("server-root", default=constants.CLI_DEFAULTS["server_root"],
             help="Exim server root directory.")
         add("file-configuration", action="store_true",
-            help="Whether Exim is using a single configuration file (Default: False)")
+            help="Whether Exim is using a single configuration file.")
 
     def __init__(self, *args, **kwargs):
         super(EximInstaller, self).__init__(*args, **kwargs)
