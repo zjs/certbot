@@ -15,17 +15,21 @@ logger = logging.getLogger(__name__)
 
 @zope.interface.implementer(interfaces.IInstaller)
 @zope.interface.provider(interfaces.IPluginFactory)
-class Installer(common.Plugin):
+class EximInstaller(common.Plugin):
     """Exim installer.
     """
+    description="Exim Installer plugin for Certbot"
 
     @classmethod
     def add_parser_arguments(cls, add):
         add("server-root", default=constants.CLI_DEFAULTS["server_root"],
             help="Exim server root directory.")
+        add("file-configuration", default=constants.CLI_DEFAULTS["file_configuration"],
+            help="Exim configuration file setting (single-file or split-file)")
+        add("conf-file-location", default=constants.CLI_DEFAULTS["config_file_location"])
 
     def __init__(self, *args, **kwargs):
-        super(Installer, self).__init__(*args, **kwargs)
+        super(EximInstaller, self).__init__(*args, **kwargs)
 
         self._enhance_func = {"staple-ocsp": self._enable_ocsp_stapling}
 
@@ -38,6 +42,7 @@ class Installer(common.Plugin):
         :raises .errors.NoInstallationError: If Exim command cannot be found
         """
         restart_cmd = constants.CLI_DEFAULTS['restart_cmd']
+
         if not util.exe_exists(restart_cmd):
             raise errors.NoInstallationError(
                 'Cannot find command {0}'.format(restart_cmd))
@@ -66,7 +71,9 @@ class Installer(common.Plugin):
         # TODO: Set `tls_advertise_hosts = *`
         # TODO: Set `tls_certificate = $fulchain_path` and `tls_privatekey = $key_path`
         # TODO: Maybe set `tls_require_ciphers` based on Mozilla recommendations (Apache and nginx both seem to do this)
-        pass
+        if self.conf('file-configuration') == 'single-file':
+            pass
+
 
 
     def restart(self):
@@ -81,7 +88,20 @@ class Installer(common.Plugin):
 
         :raises .errors.MisconfigurationError: If config_test fails
         """
-        pass  # TODO: `exim -C test.conf -bV`? (or similar)
+        if self.conf('file-configuration') == 'single-file':
+            try:
+                util.run_script(["exim", "-C", self.conf('conf-file-location'), "-bV"])
+            except errors.SubprocessError as err:
+                raise errors.MisconfigurationError(str(err))
+        else:
+            try:
+                conf_files = ['/etc/exim4/conf.d/main/01_exim4-config_listmacrosdefs',
+                              '/etc/exim4/conf.d/main/02_exim4-config_options',
+                              '/etc/exim4/conf.d/main/03_exim4-config_tlsoptions',
+                              '/etc/exim4/conf.d/main/90_exim4-config_log_selector']
+                [util.run_script(["exim", "-C", conf_file, "-bV"]) for conf_file in conf_files]
+            except errors.SubprocessError as err:
+                raise errors.MisconfigurationError(str(err))
 
     ##################################
     # Enhancement methods (IInstaller)
@@ -125,6 +145,7 @@ class Installer(common.Plugin):
         :param chain_path: chain file path
         :type chain_path: `str` or `None`
         """
+
         pass  # TODO: Write `tls_ocsp_file = $chain_path` to the configuration file for $domain
 
     ###################################################

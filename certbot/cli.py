@@ -1288,8 +1288,8 @@ def _plugins_parsing(helpful, plugins):
                 help=('Obtain certificates using a DNS TXT record (if you are '
                       'using NS1 for DNS).'))
     helpful.add(["plugins", "certonly"], "--dns-rfc2136", action="store_true",
-                help='Obtain certificates using a DNS TXT record (if you are using BIND for DNS).'
-)    helpful.add(["plugins", "certonly"], "--dns-route53", action="store_true",
+                help='Obtain certificates using a DNS TXT record (if you are using BIND for DNS).')
+    helpful.add(["plugins", "certonly"], "--dns-route53", action="store_true",
                 help=('Obtain certificates using a DNS TXT record (if you are using Route53 for '
                       'DNS).'))
     helpful.add(["plugins", "certonly", "run", "install", "config_changes"], "--exim",

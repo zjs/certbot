@@ -61,7 +61,7 @@ setup(
     },
     entry_points={
         'certbot.plugins': [
-            'exim = certbot_exim.installer:Installer',
+            'exim = certbot_exim.installer:EximInstaller',
         ],
     },
     test_suite='certbot_exim',
