@@ -83,13 +83,34 @@ class EximTest(unittest.TestCase):
         self.installer.enhance('myhost', 'staple-ocsp')
         self.installer.parser.set_directive.assert_called_once_with("tls_ocsp_file", mock.ANY)
 
-    def test_config_test(self):
-        pass
+    @mock.patch("certbot_nginx.configurator.util.run_script")
+    def test_config_test(self, mock_runscript):
+        mock_runscript.returnvalue = 1
+
+        self.installer.parser = mock.MagicMock()
+        self.installer.config_test()
+
+    @mock.patch("certbot.reverter.Reverter.recovery_routine")
+    def test_recovery_routine_throws_error_from_reverter(self, mock_recovery_routine):
+        self.installer.parser = mock.MagicMock()
+
+        mock_recovery_routine.side_effect = errors.ReverterError("foo")
+        self.assertRaises(errors.PluginError, self.installer.recovery_routine)
+
+    @mock.patch("certbot.reverter.Reverter.view_config_changes")
+    def test_view_config_changes_throws_error_from_reverter(self, mock_view_config_changes):
+        mock_view_config_changes.side_effect = errors.ReverterError("foo")
+        self.assertRaises(errors.PluginError, self.installer.view_config_changes)
+
+    @mock.patch("certbot.reverter.Reverter.rollback_checkpoints")
+    def test_rollback_checkpoints_throws_error_from_reverter(self, mock_rollback_checkpoints):
+        mock_rollback_checkpoints.side_effect = errors.ReverterError("foo")
+        self.assertRaises(errors.PluginError, self.installer.rollback_checkpoints)
 
 
 def get_exim_installer(
         config_path, config_dir, work_dir, logs_dir):
-    """Create an Nginx Configurator with the specified options."""
+    """Create an Exim Configurator with the specified options."""
 
     backups = os.path.join(work_dir, "backups")
 
