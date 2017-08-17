@@ -10,22 +10,20 @@ The plugin will enable STARTTLS and set required ciphers based on Mozilla recomm
 Named Arguments
 ---------------
 
-=============================  ==========================================================
+=============================  ==================================================================
 ``--exim-server-root``         The Exim server's root directory (Default: ``/etc/exim4``)
-``--exim-file-configuration``  ``single-file`` to indicate a single file is used for
-                               configuration or ``split-file`` to indicate that a
-                               configuration directory is used.
-=============================  ==========================================================
+``--exim-file-configuration``  Indicates that Exim is using a configuration file instead of a
+                               configuration directory. (Default: False)
+=============================  ==================================================================
 
 
 Supported Enhancements
 ----------------------
 
-=============================  ==========================================================
-``--staple-ocsp``              Enables OCSP Stapling. A valid OCSP response is
-                               stapled to the certificate that the server offers
-                               during TLS. (default: None)
-=============================  ==========================================================
+=============================  ==================================================================
+``--staple-ocsp``              Enables OCSP Stapling. A valid OCSP response is stapled to
+                               the certificate that the server offers during TLS. (default: None)
+=============================  ==================================================================
 
 
 Examples

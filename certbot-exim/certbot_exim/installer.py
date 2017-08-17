@@ -20,14 +20,14 @@ logger = logging.getLogger(__name__)
 class EximInstaller(common.Plugin):
     """Exim installer.
     """
-    description="Exim Installer plugin for Certbot"
+    description = "Exim Installer plugin for Certbot"
 
     @classmethod
     def add_parser_arguments(cls, add):
         add("server-root", default=constants.CLI_DEFAULTS["server_root"],
             help="Exim server root directory.")
-        add("file-configuration", default=constants.CLI_DEFAULTS["file_configuration"],
-            help="Exim configuration file setting (single-file or split-file)")
+        add("file-configuration", action="store_true",
+            help="Whether Exim is using a single configuration file (Default: False)")
 
     def __init__(self, *args, **kwargs):
         super(EximInstaller, self).__init__(*args, **kwargs)
@@ -67,8 +67,8 @@ class EximInstaller(common.Plugin):
         """
         return [self.parser.get_directive("primary_hostname")]
 
-    def deploy_cert(self, domain, cert_path, key_path, chain_path,
-                    fullchain_path):
+    def deploy_cert(self, domain, cert_path, key_path, chain_path, fullchain_path):
+        # pylint: disable=unused-argument
         """Deploy certificate.
 
         :param str domain: domain to deploy certificate file
@@ -82,8 +82,8 @@ class EximInstaller(common.Plugin):
         """
 
         self.parser.set_directive("tls_advertise_hosts", "*")
-        self.parser.set_directive("tls_certificate",     fullchain_path)
-        self.parser.set_directive("tls_privatekey",      key_path)
+        self.parser.set_directive("tls_certificate", fullchain_path)
+        self.parser.set_directive("tls_privatekey", key_path)
         #self.parser.set_directive("tls_require_ciphers", TODO)
 
         self.save_notes += "Updated Exim configuration to advertise TLS for all hosts\n"
@@ -101,8 +101,9 @@ class EximInstaller(common.Plugin):
         :raises .errors.MisconfigurationError: If config_test fails
         """
         try:
-            conf_files = self.parser.get_files()
-            [util.run_script(["exim", "-C", conf_file, "-bV"]) for conf_file in conf_files]
+            for conf_file in self.parser.get_files():
+                util.run_script(["exim", "-C", conf_file, "-bV"])
+
         except errors.SubprocessError as err:
             raise errors.MisconfigurationError(str(err))
 
@@ -142,6 +143,7 @@ class EximInstaller(common.Plugin):
             raise
 
     def _enable_ocsp_stapling(self, domain, chain_path):
+        # pylint: disable=unused-argument
         """Enables OCSP Stapling
 
         :param str domain: domain to enable OCSP response for
@@ -186,13 +188,13 @@ class EximInstaller(common.Plugin):
             if temporary:
                 self.reverter.add_to_temp_checkpoint(save_files, self.save_notes)
             else:
-                self.reverter.add_to_checkpoint(save_files,self.save_notes)
+                self.reverter.add_to_checkpoint(save_files, self.save_notes)
         except errors.ReverterError as err:
             raise errors.PluginError(str(err))
 
         self.save_notes = ""
 
-        self.parser.filedump()
+        self.parser.dump()
         if title and not temporary:
             try:
                 self.reverter.finalize_checkpoint(title)
