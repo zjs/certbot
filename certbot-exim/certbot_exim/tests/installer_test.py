@@ -107,3 +107,7 @@ def get_data_filename(filename):
     return pkg_resources.resource_filename(
         "certbot_exim.tests", os.path.join(
             "testdata", "etc_exim4", filename))
+
+
+if __name__ == '__main__':
+    unittest.main()  # pragma: no cover
