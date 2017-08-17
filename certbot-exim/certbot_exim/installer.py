@@ -5,10 +5,12 @@ import zope.interface
 
 from certbot import errors
 from certbot import interfaces
+from certbot import reverter
 from certbot import util
 from certbot.plugins import common
 
 from certbot_exim import constants
+from certbot_exim import parser
 
 logger = logging.getLogger(__name__)
 
@@ -26,12 +28,21 @@ class EximInstaller(common.Plugin):
             help="Exim server root directory.")
         add("file-configuration", default=constants.CLI_DEFAULTS["file_configuration"],
             help="Exim configuration file setting (single-file or split-file)")
-        add("conf-file-location", default=constants.CLI_DEFAULTS["config_file_location"])
 
     def __init__(self, *args, **kwargs):
         super(EximInstaller, self).__init__(*args, **kwargs)
 
         self._enhance_func = {"staple-ocsp": self._enable_ocsp_stapling}
+
+        # This will be set in the prepare function (since filenames are not known at this time)
+        self.parser = None
+
+        # This will be updated as changes are staged
+        self.save_notes = ""
+
+        # Set up reverter
+        self.reverter = reverter.Reverter(self.config)
+        self.reverter.recovery_routine()
 
     def more_info(self):  # pylint: disable=missing-docstring,no-self-use
         return 'This plugin configures Exim to use a certificate.'
@@ -47,13 +58,14 @@ class EximInstaller(common.Plugin):
             raise errors.NoInstallationError(
                 'Cannot find command {0}'.format(restart_cmd))
 
+        self.parser = parser.EximParser(self.conf('server-root'), self.conf('file-configuration'))
+
     def get_all_names(self):
         """Returns all names known to Exim.
 
         :rtype: `collections.Iterable` of `str`
         """
-
-        pass  # TODO: return the value of `primary_hostname` from the Exim config
+        return [self.parser.get_directive("primary_hostname")]
 
     def deploy_cert(self, domain, cert_path, key_path, chain_path,
                     fullchain_path):
@@ -68,13 +80,13 @@ class EximInstaller(common.Plugin):
 
         :raises .PluginError: when cert cannot be deployed
         """
-        # TODO: Set `tls_advertise_hosts = *`
-        # TODO: Set `tls_certificate = $fulchain_path` and `tls_privatekey = $key_path`
-        # TODO: Maybe set `tls_require_ciphers` based on Mozilla recommendations (Apache and nginx both seem to do this)
-        if self.conf('file-configuration') == 'single-file':
-            pass
 
+        self.parser.set_directive("tls_advertise_hosts", "*")
+        self.parser.set_directive("tls_certificate",     fullchain_path)
+        self.parser.set_directive("tls_privatekey",      key_path)
+        #self.parser.set_directive("tls_require_ciphers", TODO)
 
+        self.save_notes += "Updated Exim configuration to advertise TLS for all hosts\n"
 
     def restart(self):
         """Restart exim daemon"""
@@ -88,20 +100,11 @@ class EximInstaller(common.Plugin):
 
         :raises .errors.MisconfigurationError: If config_test fails
         """
-        if self.conf('file-configuration') == 'single-file':
-            try:
-                util.run_script(["exim", "-C", self.conf('conf-file-location'), "-bV"])
-            except errors.SubprocessError as err:
-                raise errors.MisconfigurationError(str(err))
-        else:
-            try:
-                conf_files = ['/etc/exim4/conf.d/main/01_exim4-config_listmacrosdefs',
-                              '/etc/exim4/conf.d/main/02_exim4-config_options',
-                              '/etc/exim4/conf.d/main/03_exim4-config_tlsoptions',
-                              '/etc/exim4/conf.d/main/90_exim4-config_log_selector']
-                [util.run_script(["exim", "-C", conf_file, "-bV"]) for conf_file in conf_files]
-            except errors.SubprocessError as err:
-                raise errors.MisconfigurationError(str(err))
+        try:
+            conf_files = self.parser.get_files()
+            [util.run_script(["exim", "-C", conf_file, "-bV"]) for conf_file in conf_files]
+        except errors.SubprocessError as err:
+            raise errors.MisconfigurationError(str(err))
 
     ##################################
     # Enhancement methods (IInstaller)
@@ -145,8 +148,8 @@ class EximInstaller(common.Plugin):
         :param chain_path: chain file path
         :type chain_path: `str` or `None`
         """
-
-        pass  # TODO: Write `tls_ocsp_file = $chain_path` to the configuration file for $domain
+        self.parser.set_directive("tls_ocsp_file", chain_path)
+        self.save_notes += "Updated Exim configuration to enable OCSP stapling\n"
 
     ###################################################
     # Wrapper functions for Reverter class (IInstaller)
@@ -176,7 +179,27 @@ class EximInstaller(common.Plugin):
             an attempt to save the configuration, or an error creating a
             checkpoint
         """
-        pass  # TODO: Implement based on nginx
+        save_files = set(self.parser.get_files())
+
+        try:  # TODO: make a common base for Apache, Nginx, and Exim plugins
+            # Create Checkpoint
+            if temporary:
+                self.reverter.add_to_temp_checkpoint(save_files, self.save_notes)
+            else:
+                self.reverter.add_to_checkpoint(save_files,self.save_notes)
+        except errors.ReverterError as err:
+            raise errors.PluginError(str(err))
+
+        self.save_notes = ""
+
+        self.parser.filedump()
+        if title and not temporary:
+            try:
+                self.reverter.finalize_checkpoint(title)
+            except errors.ReverterError as err:
+                raise errors.PluginError(str(err))
+
+        return True
 
     def rollback_checkpoints(self, rollback=1):
         """Revert `rollback` number of configuration checkpoints.
@@ -217,4 +240,3 @@ class EximInstaller(common.Plugin):
             self.reverter.view_config_changes()
         except errors.ReverterError as err:
             raise errors.PluginError(str(err))
-
