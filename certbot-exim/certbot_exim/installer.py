@@ -47,6 +47,7 @@ class Installer(common.Plugin):
 
         :rtype: `collections.Iterable` of `str`
         """
+
         pass  # TODO: return the value of `primary_hostname` from the Exim config
 
     def deploy_cert(self, domain, cert_path, key_path, chain_path,
@@ -163,7 +164,11 @@ class Installer(common.Plugin):
         :raises .errors.PluginError: If there is a problem with the input or
             the function is unable to correctly revert the configuration
         """
-        pass  # TODO: Copy from nginx
+        try:
+            self.reverter.rollback_checkpoints(rollback)
+        except errors.ReverterError as err:
+            raise errors.PluginError(str(err))
+        self.parser.load()
 
     def recovery_routine(self):
         """Revert configuration to most recent finalized checkpoint.
@@ -174,7 +179,11 @@ class Installer(common.Plugin):
 
         :raises .errors.PluginError: If unable to recover the configuration
         """
-        pass  # TODO: Copy from nginx
+        try:
+            self.reverter.recovery_routine()
+        except errors.ReverterError as err:
+            raise errors.PluginError(str(err))
+        self.parser.load()
 
     def view_config_changes(self):
         """Show all of the configuration changes that have taken place.
@@ -182,4 +191,8 @@ class Installer(common.Plugin):
         :raises .errors.PluginError: If there is a problem while processing
             the checkpoints directories.
         """
-        pass  # TODO: Copy from nginx
+        try:
+            self.reverter.view_config_changes()
+        except errors.ReverterError as err:
+            raise errors.PluginError(str(err))
+
